@@ -1,13 +1,22 @@
 import showWarning from 'utils/show-warning.js'
 import { lsSet, lsGet } from 'utils/ls.js'
 import { validateModel } from 'src/validation.helper.js'
+import { updateOb } from 'src/bootstrap.js'
+
+function publish(type){
+  updateOb(
+    type,
+    readAll(type)
+  )
+}
+
 
 export function create(type, data, existingId = null){
   const gerbilerKey = lsGet('gerbiler')
   let newId = existingId || nextId(type)
   if (!validateModel(type, data)){
     showWarning(`invalid properties found for type: ${type}`)
-    return data
+    return false
   } else {
     const table = `${gerbilerKey}_${type}`
     lsSet(
@@ -18,7 +27,8 @@ export function create(type, data, existingId = null){
       }
     )
 
-    return {...data, id: newId}
+    publish(type)
+    return true
   }
 }
 
@@ -29,7 +39,9 @@ export function showTables() {
 }
 
 export function readAll(type){
-  const full = lsGet(type)
+  const full = lsGet(
+    `${lsGet('gerbiler')}_${type}`
+  )
 
   return Object.keys(full).reduce((acc, curr) =>
     [...acc, full[curr]],
@@ -57,6 +69,8 @@ export function destroy(type, id){
     table,
     existingSet
   )
+
+  publish(type)
 }
 
 function nextId(type){

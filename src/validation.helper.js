@@ -34,3 +34,8 @@ export function validateTableName(table){
 
   return tables && tables.includes(table)
 }
+
+
+/*
+  todo: validate values
+*/
